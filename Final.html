@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎶 Lyrics Emoji Translator 🎶</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #ff6ec7, #7873f5, #4ade80);
+      background-size: 600% 600%;
+      animation: gradientShift 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    @keyframes gradientShift {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+    .card {
+      width: 100%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    h1 { margin-bottom: 15px; font-size: 1.8em; }
+    textarea {
+      width: 100%; height: 120px;
+      border-radius: 12px; border: none;
+      padding: 12px; font-size: 16px; outline: none;
+    }
+    select, button {
+      margin: 10px 5px;
+      padding: 10px 15px;
+      border: none; border-radius: 10px;
+      font-size: 15px; cursor: pointer; font-weight: bold;
+    }
+    .output {
+      margin-top: 20px;
+      font-size: 17px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+    .divider { margin: 15px 0; font-size: 18px; color: #ffe8f3; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎶 Lyrics Emoji Translator 🎶</h1>
+    <textarea id="lyricsInput" placeholder="Paste lyrics here..."></textarea><br>
+    <div>
+      <button onclick="processLyrics()">✨ Stylize Lyrics ✨</button>
+      <select id="langSelect">
+        <option value="ur">Urdu 🇵🇰</option>
+        <option value="pa">Punjabi 🥁</option>
+        <option value="hi">Hindi 🇮🇳</option>
+        <option value="ar">Arabic 🌙</option>
+      </select>
+      <button onclick="translateLyrics()">🌍 Translate All 🌍</button>
+    </div>
+    <div class="output" id="output"></div>
+  </div>
+
+  <script>
+    // Emoji keyword map
+    const emojiMap = {
+      love: "❤️💕", sad: "😢💔", happy: "😃✨", dance: "💃🕺",
+      night: "🌙⭐", star: "🌟", dream: "💭🌌", heart: "❤️"
+    };
+    const kaomojis = ["(✿ ♥‿♥)", "(≧◡≦)", "(◍•ᴗ•◍)❤", "(๑♡⌓♡๑)", "♡(> ਊ <)♡"];
+
+    function processLyrics() {
+      const text = document.getElementById("lyricsInput").value;
+      if (!text) return alert("Paste some lyrics first!");
+
+      const lines = text.split(/\n/).filter(l => l.trim() !== "");
+      let chunks = [];
+      for (let i = 0; i < lines.length; i += 3) {
+        chunks.push(lines.slice(i, i+3).join("\n"));
+      }
+
+      let final = "";
+      chunks.forEach(chunk => {
+        let styled = chunk.split(" ").map(word => {
+          const clean = word.toLowerCase();
+          return emojiMap[clean] ? word + " " + emojiMap[clean] : word;
+        }).join(" ");
+        final += styled + 
+          `\n\n<div class='divider'>✨ ${kaomojis[Math.floor(Math.random()*kaomojis.length)]} ✨</div>\n`;
+      });
+
+      document.getElementById("output").innerHTML = final;
+    }
+
+    async function translateLyrics() {
+      const text = document.getElementById("lyricsInput").value;
+      const lang = document.getElementById("langSelect").value;
+      if (!text) return alert("Enter some lyrics first!");
+      try {
+        const res = await fetch("https://libretranslate.de/translate", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            q: text, source: "en", target: lang, format: "text"
+          })
+        });
+        const data = await res.json();
+        document.getElementById("output").innerHTML =
+          `<div style="font-size:20px;">${data.translatedText}</div>`;
+      } catch (err) {
+        alert("Translation failed 😢 (try again)");
+      }
+    }
+  </script>
+</body>
+</html>
